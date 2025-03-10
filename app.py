@@ -27,14 +27,6 @@ titanic_models = {
     "Support Vector Machine (SVM)": joblib.load(svm_path),
 }
 
-# Animal Labels Translation
-translate = {
-    "cane": "dog", "cavallo": "horse", "elefante": "elephant", "farfalla": "butterfly", "gallina": "chicken", 
-    "gatto": "cat", "mucca": "cow", "pecora": "sheep", "scoiattolo": "squirrel", 
-    "dog": "cane", "horse": "cavallo", "elephant": "elefante", "butterfly": "farfalla", "chicken": "gallina", 
-    "cat": "gatto", "cow": "mucca", "spider": "ragno", "squirrel": "scoiattolo"
-}
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load Animal Classification Model (ResNet18)
@@ -67,7 +59,17 @@ transform = transforms.Compose([
 ])
 
 # Sidebar Navigation
-menu = st.sidebar.radio("Choose an Option", ["Titanic Survival", "Animal Classification" , "Machine Learning Demo"])
+menu = st.sidebar.radio("Choose an Option", ["Machine Learning", "Machine Learning Demo", "Neural Network", "Neural Network Demo" ])
+
+# Route to different pages
+if menu == "Machine Learning":
+    MachineLearning()   
+elif menu == "Machine Learning Demo":
+    machine_learning_demo()
+elif menu == "Neural Network":
+    NeuralNetwork()
+elif menu == "Neural Network Demo":
+    neural_network_demo()
 
 # Titanic Survival Prediction Page
 if menu == "Titanic Survival Prediction":
@@ -79,8 +81,7 @@ if menu == "Titanic Survival Prediction":
     - **K-Nearest Neighbors (KNN)**: A simple algorithm that classifies based on closest data points.
     - **Support Vector Machine (SVM)**: A model that finds the best boundary between different classes.
     """)
-        
-    # Machine Learning Demo Page
+# Machine Learning Demo Page
 elif menu == "Machine Learning Demo":
     st.title("🚀 Machine Learning Demo")
     st.header("🛳️ Predict Titanic Passenger Survival")
@@ -103,9 +104,8 @@ elif menu == "Machine Learning Demo":
         prediction = titanic_models[selected_model].predict(input_data)
         result = "Survived ✅" if prediction[0] == 1 else "Did NOT Survive ❌"
         st.success(f"Prediction: {result}")
-
-# Animal Classification Page
-elif menu == "Animal Classification":
+# Neural Network Demo Page
+elif menu == "Neural Network Demo":
     st.header("🐶 Classify an Animal Image")
 
     # Upload Image
@@ -113,6 +113,10 @@ elif menu == "Animal Classification":
 
     if uploaded_file:
         image = Image.open(uploaded_file)
+        
+        if image.mode == "RGBA":
+            image = image.convert("RGB")
+        
         st.image(image, caption="Uploaded Image", use_column_width=True)
 
         # Preprocess Image
@@ -142,4 +146,3 @@ elif menu == "Animal Classification":
         predicted_animal = animal_labels[predicted_class]
 
         st.success(f"Prediction: {predicted_class} ({animal_labels[predicted_class]})")
-
