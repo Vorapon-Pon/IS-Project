@@ -51,16 +51,6 @@ transform = transforms.Compose([
 # Sidebar Navigation
 menu = st.sidebar.radio("Choose an Option", ["Machine Learning", "Machine Learning Demo", "Neural Network", "Neural Network Demo" ])
 
-# Route to different pages
-if menu == "Machine Learning":
-    MachineLearning()   
-elif menu == "Machine Learning Demo":
-    machine_learning_demo()
-elif menu == "Neural Network":
-    NeuralNetwork()
-elif menu == "Neural Network Demo":
-    neural_network_demo()
-
 # Titanic Survival Prediction Page
 if menu == "Titanic Survival Prediction":
     st.title("📊 Machine Learning Model Details")
