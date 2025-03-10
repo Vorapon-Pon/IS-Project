@@ -458,10 +458,7 @@ plt.show()
         ax.set_xlabel('Predicted')
         ax.set_ylabel('Actual')
         st.pyplot(fig)
-    
-
-    
-   
+     
     st.success("Try predicting Titanic passenger survival using the form on Demo page!")
 
 # Run independently
