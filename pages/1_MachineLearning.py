@@ -1,27 +1,51 @@
 import streamlit as st
 import pandas as pd
+import seaborn as sns
+import os
+import joblib
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
 
-data_path = "data/Titanic.csv" 
-df = pd.read_csv(data_path)
+model_path = os.path.join("models", "Titanic_random_forest.pkl")
+knn_path = os.path.join("models", "Titanic_knn.pkl")
+svm_path = os.path.join("models", "Titanic_svm.pkl")
 
-columns_to_drop = ['PassengerId', 'Name', 'Ticket', 'Cabin', 'Embarked', 'Fare']
-
-X = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
-
-X['Sex'] = LabelEncoder().fit_transform(df['Sex'])
+# Load models
+titanic_models = {
+    "Random Forest": joblib.load(model_path),
+    "K-Nearest Neighbors (KNN)": joblib.load(knn_path),
+    "Support Vector Machine (SVM)": joblib.load(svm_path),
+}
 
 def titanic_description():
     st.set_page_config(
-        page_title="Machine Learning Model Details",  # Page title
+        page_title="ML Model Details",  # Page title
         layout="wide" 
     )
+
+    # Data loading and preprocessing
+    data_path = "data/Titanic.csv" 
+    df = pd.read_csv(data_path)
+
+    columns_to_drop = ['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin', 'Embarked', 'Fare']
+
+    X = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
+
+    X['Sex'] = LabelEncoder().fit_transform(df['Sex'])
+    X['Age'].fillna(X['Age'].median(), inplace=True)
+
+    y = df['Survived']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Custom Styling
     st.markdown("""
         <style>
             body {
-                font-family: "Raleway", sans-serif;
+                font-family: "Roboto Mono", monospace;
             }
             /* Center content and limit max width */
             .block-container {
@@ -312,29 +336,132 @@ def titanic_description():
     st.divider()
 
     # Models Used 
-    st.markdown('<div class="h2"> Models </div>', unsafe_allow_html=True)
+    st.markdown('<div class="h2"> Models Used </div>', unsafe_allow_html=True)
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px;'>", unsafe_allow_html=True)
 
-    # Machine Learning Models
-    with st.expander("🏆 **Machine Learning Models Used**", expanded=True):
-        st.write("""
-        The following models were tested:
-        - **Random Forest Classifier** 🌳
-        - **K-Nearest Neighbors (KNN)** 🔍
-        - **Support Vector Machine (SVM)** 📈
-
-        **Random Forest achieved the highest accuracy and was selected for predictions.**
+    col1, col2 = st.columns([0.5, 0.5])
+    with col1:
+        st.subheader("K-Nearest Neighbors (KNN)")
+        st.write("&emsp;&emsp;KNN is a simple algorithm that classifies data points based on the majority class of their k-nearest neighbors. It is a non-parametric method that does not make strong assumptions about the underlying data distribution.")
+    with col2:
+        st.subheader("Hyperparameters")
+        st.markdown("""
+        - `n_neighbors` : Number of neighbors to consider for classification.
+        - `Distance Metric` : The measure used to calculate the distance between data points (e.g., Euclidean, Manhattan).
         """)
-    st.divider()
+    
+    st.markdown('<br>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([0.5, 0.5])
+    with col1:
+        st.subheader("Support Vector Machine (SVM)")
+        st.write("&emsp;&emsp;SVM is a powerful algorithm that finds the optimal hyperplane to separate data points into different classes. It works well for both linearly separable and non-linearly separable data.")
 
-    # Model Evaluation
-    with st.expander("📉 **Model Evaluation**", expanded=True):
-        st.write("""
-        - **Accuracy Score** ✅
-        - **Precision, Recall, F1 Score** 📊
-        - **Confusion Matrix Visualization** 🟦
+    with col2:
+        st.subheader("Hyperparameters")
+        st.markdown("""
+        - `C` : Regularization parameter that controls the trade-off between margin maximization and error minimization.
+        - `Kernel` : The function used to transform the input data into a higher-dimensional space.
         """)
+    
+        st.markdown('<br>', unsafe_allow_html=True)
 
+    col1, col2 = st.columns([0.5, 0.5])
+    with col1:
+        st.subheader("Random Forest Classifier")
+        st.write("&emsp;&emsp;Random Forest is an ensemble learning method that builds multiple decision trees and combines their predictions to improve classification performance. Each tree is trained on a random subset of the data and features, reducing overfitting and increasing robustness.")
+
+    with col2:
+        st.subheader("Hyperparameters")
+        st.markdown("""
+        - `n_estimators` : Number of decision trees in the forest.
+        - `max_depth` : Maximum depth of each decision tree.
+        """)
+        
+    st.subheader("Model Details")
+    
+    st.markdown('<div class="h3">Random Forest</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([0.6, 0.4])
+    with col1:
+        st.code("RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)\nmodel.fit(X_train, y_train)")
+        
+    with col2:
+        st.write("""
+            An ensemble learning method using multiple decision trees. 
+            in this model used 100 decision trees with a maximum depth 5.
+        """)
+        
+    st.markdown('<div class="h3">K-Nearest Neighbors (KNN)</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([0.6, 0.4])
+    with col1:
+        st.code("knn_model = KNeighborsClassifier(n_neighbors=5)\nknn_model.fit(X_train, y_train)")
+    
+    with col2:
+        st.write("""
+            A simple algorithm that classifies based on the majority class of their k-nearest neighbors. 
+            in this model used 5 neighbors for classification.
+        """)
+        
+    st.markdown('<div class="h3">Support Vector Machine (SVM)</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([0.6, 0.4])
+    with col1:
+        st.code("svm_model = SVC(C=1.0, kernel='rbf', random_state=42)\nsvm_model.fit(X_train, y_train)")
+    
+    with col2:
+        st.write("""
+            A model that finds the best boundary between different classes. 
+            in this model used a radial basis function kernel with a regularization parameter of 1.0.
+        """)
+    
+    st.markdown('<div class="h2">Model Evaluation</div>', unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px;'>", unsafe_allow_html=True)
+
+    st.code("""
+# Predictions
+y_pred = model.predict(X_test)
+
+# Model Evaluation
+accuracy = accuracy_score(y_test, y_pred)
+print(f'Accuracy: {accuracy:.4f}')
+
+print('Classification Report:')
+print(classification_report(y_test, y_pred))
+
+print('Confusion Matrix:')
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+            """)
+   
+    col1, col2 = st.columns([0.3, 0.5])
+    with col1:
+        # Model selection
+        model_choice = st.selectbox("Choose a Model", list(titanic_models.keys()))
+        model = titanic_models[model_choice]
+        
+        # Ensure the feature names match those used during fitting
+        X_test = X_test[model.feature_names_in_]
+        y_pred = model.predict(X_test)
+
+        # Model evaluation
+        accuracy = accuracy_score(y_test, y_pred)
+        st.write(f'### Accuracy: {accuracy:.4f}')
+
+        st.write("### Classification Report:")
+        st.text(classification_report(y_test, y_pred))
+   
+    with col2:
+        st.write("### Confusion Matrix:")
+        fig, ax = plt.subplots()
+        sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues', ax=ax)
+        ax.set_xlabel('Predicted')
+        ax.set_ylabel('Actual')
+        st.pyplot(fig)
+    
+
+    
+   
     st.success("Try predicting Titanic passenger survival using the form on Demo page!")
 
 # Run independently

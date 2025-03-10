@@ -12,20 +12,10 @@ import joblib
 
 # Use relative paths
 
-# Machine Learning Models
-model_path = os.path.join("models", "Titanic_random_forest.pkl")
-knn_path = os.path.join("models", "Titanic_knn.pkl")
-svm_path = os.path.join("models", "Titanic_svm.pkl")
-
 # Neural Network Model
 animal_model_path = os.path.join("models", "Animal10_Restnet18.pth")
 
-# Load models
-titanic_models = {
-    "Random Forest": joblib.load(model_path),
-    "K-Nearest Neighbors (KNN)": joblib.load(knn_path),
-    "Support Vector Machine (SVM)": joblib.load(svm_path),
-}
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
