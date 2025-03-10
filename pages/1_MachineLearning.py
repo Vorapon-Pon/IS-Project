@@ -1,8 +1,15 @@
 import streamlit as st
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 data_path = "data/Titanic.csv" 
 df = pd.read_csv(data_path)
+
+columns_to_drop = ['PassengerId', 'Name', 'Ticket', 'Cabin', 'Embarked', 'Fare']
+
+X = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
+
+X['Sex'] = LabelEncoder().fit_transform(df['Sex'])
 
 def titanic_description():
     st.set_page_config(
@@ -55,11 +62,11 @@ def titanic_description():
 
             .h3 {
             font-size: 24px;
+            padding-top: 10px;
             }
             
             .custom-markdown tag{
                 color: #FE4A4B;
-                font-weight: bold;
             }
 
         </style>
@@ -99,9 +106,7 @@ def titanic_description():
         - <tag>Outcome</tag> : Maritime policy changes; SOLAS.  <br>  
         - <tag>Deaths</tag> : 1,490–1,635.  <br>  
     </div>
-    """,
-    unsafe_allow_html=True
-)
+    """,unsafe_allow_html=True)
         
     st.markdown('<div class="h3">How to classify who has a chance of survival?</div>', unsafe_allow_html=True)
     st.write("""
@@ -259,23 +264,56 @@ def titanic_description():
     st.subheader("Data Summary")
     st.write(df.describe(include="all"))
     
-    st.subheader("Feature Selection")
-    st.write("""
-        The following features were selected for model training:
-        
-        - Pclass (Ticket Class)
-        
-    """)
+    st.subheader("Data Preprocessing")
+    st.markdown('<div class="h3">Feature Selection</div>', unsafe_allow_html=True)
+    st.markdown(
+    """
+        <div class="custom-markdown">
+            historical knowledge tells us that <tag>Gender</tag>, <tag>Age</tag>, <tag>Pclass</tag>, <tag>Sibsp</tag> and <tag>Parch</tag> were significant factors in survival.  <br>
+            Therefore, we will use these features for our model training.
+        </div>
+    """, unsafe_allow_html=True)
     
-    with st.expander("⚙️ **Data Preprocessing**", expanded=True):
+    st.markdown('<div class="h3 "> Dropped unnecessary columns </div>', unsafe_allow_html=True)
+    st.code("df.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin', 'Embarked'], inplace=True")
+    st.code("# Define features and target\n X = df.drop(columns=['Survived'])\n y = df['Survived']")
+    
+    st.markdown('<div class="h3">Handling Missing Values</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([0.1, 0.4])
+    with col1:
+        st.code("df.isnull().sum()")
+        st.dataframe(df.isnull().sum())
+    
+    with col2:
+        st.code("df['Age'].fillna(df['Age'].median(), inplace=True)")
         st.write("""
-        - **Dropped unnecessary columns**: `PassengerId`, `Name`, `Ticket`, `Cabin`, `Embarked`.
-        - **Handled missing values**: Missing `Age` values were replaced with the median.
-        - **Encoded categorical variables**: Converted `Sex` to numerical values (`0` for female, `1` for male).
-        - **Feature selection**: Used `"Pclass", "Sex", "SibSp", "Parch", "Age"` for model training.
-        - **Data splitting**: 80% for training, 20% for testing.
+            The missing `Age` values were replaced with the median age.
+            """) 
+        st.write("""
+            For the `Cabin` and `Embarked` column, will drop it as it contains many missing values.
+            """) 
+        
+    st.markdown('<div class="h3">Encoded categorical variables</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([0.4, 0.3])
+    with col1:
+        st.code("df['Sex'] = LabelEncoder().fit_transform(df['Sex'])")
+    
+    with col2:
+        st.write("""
+            Encoded categorical variables to Numerical Converted Sex (Gender) (0 for female, 1 for male).
         """)
+    
+    st.markdown('<div class="h3">Data splitting</div>', unsafe_allow_html=True)
+    st.code("X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)")
+    st.write("""
+        Split the data into 80% for training and 20% for testing.
+    """)    
+    st.dataframe(X.head())
     st.divider()
+
+    # Models Used 
+    st.markdown('<div class="h2"> Models </div>', unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px;'>", unsafe_allow_html=True)
 
     # Machine Learning Models
     with st.expander("🏆 **Machine Learning Models Used**", expanded=True):
@@ -297,7 +335,7 @@ def titanic_description():
         - **Confusion Matrix Visualization** 🟦
         """)
 
-    st.success("Try predicting Titanic passenger survival using the form on this page!")
+    st.success("Try predicting Titanic passenger survival using the form on Demo page!")
 
 # Run independently
 if __name__ == "__main__":
