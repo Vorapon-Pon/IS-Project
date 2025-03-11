@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import os
 import joblib
+import random
 
 # Neural Network Model
 animal_model_path = os.path.join("models", "Animal10_Restnet18.pth")
@@ -44,7 +45,34 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-st.header("🐶 Classify an Animal Image")
+# Animal Labels
+animal_labels = ["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "sheep", "spider", "squirrel"]
+
+dataset_path = "data/raw-img" 
+
+def get_random_image(dataset_path):
+    animal_folders = os.listdir(dataset_path)  
+    random_animal = random.choice(animal_folders) 
+    animal_folder_path = os.path.join(dataset_path, random_animal)
+    animal_images = os.listdir(animal_folder_path) 
+    random_image = random.choice(animal_images)  
+    return os.path.join(animal_folder_path, random_image), random_animal
+
+st.header("Animal-10 Predictior")
+st.write("""
+    This model can classify images into **10 distinct animal classes**: 
+- 🐕 Dog
+- 🐎 Horse
+- 🐘 Elephant
+- 🦋 Butterfly
+- 🐔 Chicken
+- 🐈 Cat
+- 🐄 Cow
+- 🐑 Sheep
+- 🕷️ Spider
+- 🐿️ Squirrel
+
+""")
 
 # Upload Image
 uploaded_file = st.file_uploader("Upload an Animal Image", type=["jpg", "png"])
@@ -55,7 +83,7 @@ if uploaded_file:
     if image.mode == "RGBA":
         image = image.convert("RGB")
         
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", width=400)
 
     # Preprocess Image
     transform = transforms.Compose([
@@ -63,7 +91,7 @@ if uploaded_file:
         transforms.ToTensor()
     ])
 
-    img_tensor = transform(image).unsqueeze(0)  # Add batch dimension
+    img_tensor = transform(image).unsqueeze(0)  
 
     # Load Model
     animal_model_path = os.path.join("models", "Animal10_Restnet18.pth")
@@ -81,7 +109,22 @@ if uploaded_file:
         predicted_class = torch.argmax(output, dim=1).item()
         
     # Animal Labels (Modify as per dataset labels)
-    animal_labels = ["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "sheep", "spider", "squirrel"]
     predicted_animal = animal_labels[predicted_class]
 
-    st.success(f"Prediction: {predicted_class} ({animal_labels[predicted_class]})")
+    st.success(f"Prediction: {animal_labels[predicted_class]}")
+    
+if st.button("Random Image from Dataset"):
+    random_image_path, true_label = get_random_image(dataset_path)
+    image = Image.open(random_image_path)
+    st.image(image, caption=f"True Label: {true_label}", width=400)
+
+    # Preprocess Image
+    img_tensor = transform(image).unsqueeze(0)  # Add batch dimension
+
+    # Make Prediction
+    with torch.no_grad():
+        output = model(img_tensor.to(device))
+        predicted_class = torch.argmax(output, dim=1).item()
+        predicted_animal = animal_labels[predicted_class]
+
+    st.success(f"Prediction: {predicted_animal}")
