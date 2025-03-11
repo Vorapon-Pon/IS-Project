@@ -16,6 +16,14 @@ animal_model_path = os.path.join("models", "Animal10_Restnet18.pth")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+st.markdown("""
+    <style>
+        body {
+            font-family: "Roboto Mono", monospace;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Load Animal Classification Model (ResNet18)
 class AnimalClassifier(nn.Module):
     def __init__(self, num_classes=10):

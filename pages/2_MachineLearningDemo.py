@@ -5,6 +5,13 @@ import os
 
 # Set page config
 st.set_page_config(page_title="Titanic Survival Predictor", page_icon="🚢", layout="centered")
+st.markdown("""
+    <style>
+        body {
+            font-family: "Roboto Mono", monospace;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # Load models
 model_path = os.path.join("models", "Titanic_random_forest.pkl")
