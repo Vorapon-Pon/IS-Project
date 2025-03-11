@@ -56,7 +56,20 @@ transform = transforms.Compose([
 # Animal Labels
 animal_labels = ["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "sheep", "spider", "squirrel"]
 
-dataset_path = "data/raw-img" 
+dataset_path = "data/raw-img"
+
+translate = {
+    "cane": "dog",
+    "cavallo": "horse",
+    "elefante": "elephant",
+    "farfalla": "butterfly",
+    "gallina": "chicken",
+    "gatto": "cat",
+    "mucca": "cow",
+    "pecora": "sheep",
+    "ragno": "spider",
+    "scoiattolo": "squirrel"
+} 
 
 def get_random_image(dataset_path):
     animal_folders = os.listdir(dataset_path)  
@@ -124,7 +137,8 @@ if uploaded_file:
 if st.button("Random Image from Dataset"):
     random_image_path, true_label = get_random_image(dataset_path)
     image = Image.open(random_image_path)
-    st.image(image, caption=f"True Label: {true_label}", width=400)
+    true_label_english = translate.get(true_label, true_label)
+    st.image(image, caption=f"True Label: {true_label_english}", width=400)
 
     # Preprocess Image
     img_tensor = transform(image).unsqueeze(0)  # Add batch dimension
