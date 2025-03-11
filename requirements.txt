@@ -5,6 +5,8 @@ matplotlib
 pandas
 numpy
 torch
+tqdm
+stqdm
 torchvision
 Pillow
 joblib
