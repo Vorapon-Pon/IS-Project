@@ -3,6 +3,9 @@ import joblib
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+import seaborn as sns
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
 from torchvision import models
 from PIL import Image
 import numpy as np
@@ -80,6 +83,7 @@ def get_random_image(dataset_path):
     return os.path.join(animal_folder_path, random_image), random_animal
 
 st.header("Animal-10 Predictior")
+
 st.write("""
     This model can classify images into **10 distinct animal classes**: 
 - 🐕 Dog
@@ -94,6 +98,7 @@ st.write("""
 - 🐿️ Squirrel
 
 """)
+
 
 # Upload Image
 uploaded_file = st.file_uploader("Upload an Animal Image", type=["jpg", "png"])

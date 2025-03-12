@@ -429,7 +429,7 @@ def titanic_description():
     st.markdown('<div class="h3">Model Setup</div>', unsafe_allow_html=True)
     st.code("""
         # Load the trained model
-    model = models.resnet18(pretrained=False)
+    model = models.resnet18(pretrained=True)
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, 10)
     model.load_state_dict(torch.load("Animal10_Restnet18.pth", map_location=device))
@@ -688,6 +688,52 @@ def titanic_description():
                 - The trained model is returned and can be used for further evaluation or inference.
         """)
         
+        true_labels = []
+        predicted_labels = []
+
+    st.markdown('<div class="h3">Translate Classes</div>', unsafe_allow_html=True)
+    st.code("""
+            translate = {
+    "cane": "dog",
+    "cavallo": "horse",
+    "elefante": "elephant",
+    "farfalla": "butterfly",
+    "gallina": "chicken",
+    "gatto": "cat",
+    "mucca": "cow",
+    "pecora": "sheep",
+    "ragno": "spider",
+    "scoiattolo": "squirrel"
+    }
+    """)
+    st.markdown('<div class="h3">Confusion Matrix</div>', unsafe_allow_html=True)
+    st.code("""
+        model.eval()
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                _, preds = torch.max(outputs, 1)
+                true_labels.extend(labels.cpu().numpy())
+                predicted_labels.extend(preds.cpu().numpy())
+
+        # Compute confusion matrix
+        cm = confusion_matrix(true_labels, predicted_labels)
+
+        # Translate class names
+        translated_classes = [translate[label] for label in dataset.classes]
+
+        # Plot confusion matrix as heatmap
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=translated_classes, yticklabels=translated_classes)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.title('Confusion Matrix')
+        plt.show()
+            """)
+    st.image("data/Heatmap.png", caption="Confusion Matrix", width=500)
+    
+        
     st.code("""
         tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
     """)
@@ -703,6 +749,6 @@ def titanic_description():
                 sleep(0.1)
         
         sleep(20)
-        
+    
 if __name__ == "__main__":
     titanic_description()
