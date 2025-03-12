@@ -4,7 +4,7 @@ import torch
 import os
 
 # Set page config
-st.set_page_config(page_title="Titanic Survival Predictor", page_icon="🚢", layout="centered")
+st.set_page_config(page_title="Titanic Survival Predictor", layout="centered")
 st.markdown("""
     <style>
         body {
